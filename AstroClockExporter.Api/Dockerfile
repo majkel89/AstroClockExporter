@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 RUN apk update && apk add clang
+COPY ["Directory.Build.props", "Directory.Packages.props", "./"]
 COPY ["AstroClockExporter.Api/AstroClockExporter.Api.csproj", "AstroClockExporter.Api/"]
 COPY ["AstroClockExporter.Core/AstroClockExporter.Core.csproj", "AstroClockExporter.Core/"]
 RUN dotnet restore "AstroClockExporter.Api/AstroClockExporter.Api.csproj"
