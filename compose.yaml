@@ -1,0 +1,15 @@
+services:
+  astro-clock-exporter:
+    build:
+      context: .
+      dockerfile: AstroClockExporter.Api/Dockerfile
+    image: astro-clock-exporter:dev
+    ports:
+      - '8080:8080'
+    volumes:
+      - './AstroClockExporter.Api/config.yml:/app/config.yml:ro'
+    healthcheck:
+      test: 'test $(wget -qO- http://127.0.0.1:8080/healthy) = "healthy"'
+      interval: 30s
+      timeout: 5s
+      retries: 3

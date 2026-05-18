@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="AstroClockExporter.Api/AstroClockExporter.Api.csproj" />
+  <Project Path="AstroClockExporter.Core/AstroClockExporter.Core.csproj" />
+  <Project Path="AstroClockExporter.Tests/AstroClockExporter.Tests.csproj" />
+</Solution>

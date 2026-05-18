@@ -1,0 +1,21 @@
+﻿{
+  SunAltitudeDegrees: -1.858562,
+  SunAzimuthDegrees: 90.050012,
+  MoonAltitudeDegrees: 53.867637,
+  MoonAzimuthDegrees: 222.18253,
+  MoonIlluminationFraction: 0.711885,
+  MoonPhaseAngleDegrees: 64.927105,
+  MoonDistanceKilometres: 402494.211,
+  SunriseUnix: 1742450706.0,
+  SunsetUnix: 1742494176.0,
+  SolarNoonUnix: "NaN",
+  CivilDawnUnix: 1742535789.0,
+  CivilDuskUnix: 1742495476.0,
+  NauticalDawnUnix: 1742534349.0,
+  NauticalDuskUnix: 1742496916.0,
+  AstronomicalDawnUnix: 1742532909.0,
+  AstronomicalDuskUnix: 1742498355.0,
+  MoonriseUnix: 1742511270.0,
+  MoonsetUnix: 1742465982.0,
+  MoonTransitUnix: 1742488618.0
+}

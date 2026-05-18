@@ -1,0 +1,40 @@
+﻿# HELP astro_sun_altitude_degrees Current sun altitude above the horizon (degrees)
+# TYPE astro_sun_altitude_degrees gauge
+astro_sun_altitude_degrees NaN
+# HELP astro_sun_azimuth_degrees Current sun azimuth (degrees, measured clockwise from north)
+# TYPE astro_sun_azimuth_degrees gauge
+astro_sun_azimuth_degrees 180.5
+# HELP astro_moon_altitude_degrees Current moon altitude above the horizon (degrees)
+# TYPE astro_moon_altitude_degrees gauge
+astro_moon_altitude_degrees -10.25
+# HELP astro_moon_azimuth_degrees Current moon azimuth (degrees, measured clockwise from north)
+# TYPE astro_moon_azimuth_degrees gauge
+astro_moon_azimuth_degrees +Inf
+# HELP astro_moon_illumination_fraction Fraction of the moon's disk that is illuminated (0..1)
+# TYPE astro_moon_illumination_fraction gauge
+astro_moon_illumination_fraction 0.625
+# HELP astro_moon_phase_angle_degrees Moon phase angle (degrees, 0 = full moon, 180 = new moon)
+# TYPE astro_moon_phase_angle_degrees gauge
+astro_moon_phase_angle_degrees 78.5
+# HELP astro_moon_distance_km Earth-Moon centre-to-centre distance (kilometres)
+# TYPE astro_moon_distance_km gauge
+astro_moon_distance_km -Inf
+# HELP astro_sun_event_time_seconds Sun event time today (Unix seconds, UTC). NaN if event does not occur.
+# TYPE astro_sun_event_time_seconds gauge
+astro_sun_event_time_seconds{event="sunrise"} NaN
+astro_sun_event_time_seconds{event="sunset"} NaN
+astro_sun_event_time_seconds{event="solar_noon"} NaN
+astro_sun_event_time_seconds{event="civil_dawn"} NaN
+astro_sun_event_time_seconds{event="civil_dusk"} NaN
+astro_sun_event_time_seconds{event="nautical_dawn"} NaN
+astro_sun_event_time_seconds{event="nautical_dusk"} NaN
+astro_sun_event_time_seconds{event="astronomical_dawn"} NaN
+astro_sun_event_time_seconds{event="astronomical_dusk"} NaN
+# HELP astro_moon_event_time_seconds Moon event time today (Unix seconds, UTC). NaN if event does not occur.
+# TYPE astro_moon_event_time_seconds gauge
+astro_moon_event_time_seconds{event="moonrise"} NaN
+astro_moon_event_time_seconds{event="moonset"} NaN
+astro_moon_event_time_seconds{event="moon_transit"} NaN
+# HELP astro_calculation_seconds Wall-clock time spent computing this scrape (seconds)
+# TYPE astro_calculation_seconds gauge
+astro_calculation_seconds 0.012345

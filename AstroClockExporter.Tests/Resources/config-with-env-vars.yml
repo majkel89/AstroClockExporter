@@ -1,0 +1,5 @@
+locations:
+  parameterised:
+    latitude: ${ACE_TEST_LATITUDE}
+    longitude: ${ACE_TEST_LONGITUDE:-21}
+    elevation: ${ACE_TEST_ELEVATION:-100}

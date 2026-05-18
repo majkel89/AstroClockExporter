@@ -1,0 +1,56 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '10' ]
+    env:
+      dotNetConfiguration: Release
+      minimalCoverage: '0.63'
+
+    steps:
+      - uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET Core ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@main
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Check packages vulnerabilities
+        run: |
+          exec 5>&1
+          OUT=$(dotnet list package --include-transitive --vulnerable | tee /dev/fd/5)
+          if [[ $OUT =~ "has the following vulnerable packages" ]] ; then exit 1 ; fi
+
+      - name: Build
+        run: dotnet build --configuration ${{ env.dotNetConfiguration }} --no-restore
+
+      - name: Test
+        run: dotnet test --no-restore --collect:"XPlat Code Coverage"
+
+      - name: Coverage
+        run: |
+          echo "Code coverage: $(head AstroClockExporter.Tests/TestResults/*/coverage.cobertura.xml -n 2 | tail -n 1 | awk '{print $2}' | cut -d'"' -f 2) > ${{ env.minimalCoverage }}";
+          [[ $(echo "$(head AstroClockExporter.Tests/TestResults/*/coverage.cobertura.xml -n 2 | tail -n 1 | awk '{print $2}' | cut -d'"' -f 2) > ${{ env.minimalCoverage }}" | bc) -gt 0 ]]
+
+      - name: Lint
+        run: dotnet format --verify-no-changes
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: AstroClockExporter.Tests/TestResults/*/coverage.cobertura.xml
