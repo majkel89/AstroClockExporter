@@ -11,10 +11,16 @@ namespace AstroClockExporter.Core.Astro;
 //   - AASRiseTransitSet2 returns event JDs in UT directly.
 internal sealed class AstroCalculator : IAstroCalculator
 {
-    private const double H0Sun = -0.5833;  // standard refraction + solar semidiameter
+    private const double H0Sun = -0.5833;           // standard refraction + solar semidiameter
     private const double RiseSetStepHours = 0.007;
     private const double EarthRadiusKm = 6378.14;
     private const double AuKm = 149_597_870.7;
+    private const double MillisecondsPerSecond = 1000.0;
+    private const double SecondsPerDay = 86400.0;
+    private const double OneDayJd = 1.0;            // 24-hour event search window in Julian days
+    private const double DegreesPerHour = 15.0;     // 360° / 24h — longitude degrees → hours of RA
+    private const double AzimuthSouthToNorthOffset = 180.0; // AASharp Az is from South; +180° → clockwise from North
+    private const double JdUnixEpoch = 2440587.5;   // Julian Date of 1970-01-01 00:00:00 UTC
 
     public AstroReading Calculate(Location location, DateTime utcNow)
     {
@@ -27,10 +33,10 @@ internal sealed class AstroCalculator : IAstroCalculator
 
         // JD for "now" (UT).
         var nowDate = new AASDate(utcNow.Year, utcNow.Month, utcNow.Day,
-            utcNow.Hour, utcNow.Minute, utcNow.Second + utcNow.Millisecond / 1000.0, true);
+            utcNow.Hour, utcNow.Minute, utcNow.Second + utcNow.Millisecond / MillisecondsPerSecond, true);
         var jdUt = nowDate.Julian;
         var deltaT = AASDynamicalTime.DeltaT(jdUt);
-        var jdTt = jdUt + deltaT / 86400.0;
+        var jdTt = jdUt + deltaT / SecondsPerDay;
 
         // ----- Current sun position (topocentric horizontal: altitude / azimuth) -----
         var (sunAlt, sunAz) = SunHorizontal(jdUt, jdTt, longitudeWest, latitude);
@@ -41,12 +47,12 @@ internal sealed class AstroCalculator : IAstroCalculator
 
         // ----- Sun events from now → +24h -----
         var sunEvents = AASRiseTransitSet2.Calculate(
-            jdUt, jdUt + 1.0, AASRiseSetObject.SUN,
-            longitudeWest, latitude, H0Sun, height, RiseSetStepHours, false);
+            jdUt, jdUt + OneDayJd, AASRiseSetObject.SUN,
+            longitudeWest, latitude, H0Sun, height);
 
         // ----- Moon events from now → +24h (CalculateMoon handles parallax/refraction internally) -----
         var moonEvents = AASRiseTransitSet2.CalculateMoon(
-            jdUt, jdUt + 1.0, longitudeWest, latitude, height, RiseSetStepHours);
+            jdUt, jdUt + OneDayJd, longitudeWest, latitude, height, RiseSetStepHours);
 
         var elapsedSeconds = Stopwatch.GetElapsedTime(sw).TotalSeconds;
 
@@ -58,7 +64,7 @@ internal sealed class AstroCalculator : IAstroCalculator
             MoonAzimuthDegrees = moonAz,
             MoonIlluminationFraction = moonIllum,
             MoonPhaseAngleDegrees = moonPhaseDeg,
-            MoonDistanceKilometres = moonDistKm,
+            MoonDistanceKilometres = (long)Math.Round(moonDistKm, MidpointRounding.AwayFromZero),
 
             SunriseUnix = FirstEventUnix(sunEvents, AASRiseTransitSetDetails2.Type.Rise),
             SunsetUnix = FirstEventUnix(sunEvents, AASRiseTransitSetDetails2.Type.Set),
@@ -87,10 +93,10 @@ internal sealed class AstroCalculator : IAstroCalculator
         var epsilon = AASNutation.TrueObliquityOfEcliptic(jdTt);
         var eq = AASCoordinateTransformation.Ecliptic2Equatorial(lambda, beta, epsilon);
         var gast = AASSidereal.ApparentGreenwichSiderealTime(jdUt); // hours
-        var lhaHours = AASCoordinateTransformation.MapTo0To24Range(gast - longitudeWest / 15.0 - eq.X);
+        var lhaHours = AASCoordinateTransformation.MapTo0To24Range(gast - longitudeWest / DegreesPerHour - eq.X);
         var horizontal = AASCoordinateTransformation.Equatorial2Horizontal(lhaHours, eq.Y, latitude);
         // horizontal.X = Az measured WEST from SOUTH; convert to clockwise-from-north.
-        var azNorth = AASCoordinateTransformation.MapTo0To360Range(horizontal.X + 180.0);
+        var azNorth = AASCoordinateTransformation.MapTo0To360Range(horizontal.X + AzimuthSouthToNorthOffset);
         return (horizontal.Y, azNorth);
     }
 
@@ -103,9 +109,9 @@ internal sealed class AstroCalculator : IAstroCalculator
         var epsilon = AASNutation.TrueObliquityOfEcliptic(jdTt);
         var eq = AASCoordinateTransformation.Ecliptic2Equatorial(lambda, beta, epsilon);
         var gast = AASSidereal.ApparentGreenwichSiderealTime(jdUt);
-        var lhaHours = AASCoordinateTransformation.MapTo0To24Range(gast - longitudeWest / 15.0 - eq.X);
+        var lhaHours = AASCoordinateTransformation.MapTo0To24Range(gast - longitudeWest / DegreesPerHour - eq.X);
         var horizontal = AASCoordinateTransformation.Equatorial2Horizontal(lhaHours, eq.Y, latitude);
-        var azNorth = AASCoordinateTransformation.MapTo0To360Range(horizontal.X + 180.0);
+        var azNorth = AASCoordinateTransformation.MapTo0To360Range(horizontal.X + AzimuthSouthToNorthOffset);
 
         // Sun position (geocentric) for phase / illumination
         var sunLambda = AASSun.ApparentEclipticLongitude(jdTt, false);
@@ -123,18 +129,18 @@ internal sealed class AstroCalculator : IAstroCalculator
         return (horizontal.Y, azNorth, distanceKm, phaseAngle, illum);
     }
 
-    private static double FirstEventUnix(IEnumerable<AASRiseTransitSetDetails2> events, AASRiseTransitSetDetails2.Type type)
+    private static long FirstEventUnix(IEnumerable<AASRiseTransitSetDetails2> events, AASRiseTransitSetDetails2.Type type)
     {
         foreach (var e in events)
             if (e.type == type)
                 return JulianToUnix(e.JD);
-        return double.NaN;
+        return long.MinValue;
     }
 
     // "Solar/lunar noon" is the transit on the side of the meridian closer to the local zenith:
     //   - Northern hemisphere: southern transit
     //   - Southern hemisphere: northern transit
-    private static double FirstTransitUnix(IEnumerable<AASRiseTransitSetDetails2> events, double latitude)
+    private static long FirstTransitUnix(IEnumerable<AASRiseTransitSetDetails2> events, double latitude)
     {
         var preferred = latitude >= 0
             ? AASRiseTransitSetDetails2.Type.SouthernTransit
@@ -142,5 +148,6 @@ internal sealed class AstroCalculator : IAstroCalculator
         return FirstEventUnix(events, preferred);
     }
 
-    private static double JulianToUnix(double jd) => (jd - 2440587.5) * 86400.0;
+    private static long JulianToUnix(double jd) =>
+        (long)Math.Round((jd - JdUnixEpoch) * SecondsPerDay, MidpointRounding.AwayFromZero);
 }

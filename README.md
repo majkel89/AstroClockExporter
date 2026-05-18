@@ -1,8 +1,11 @@
 # AstroClockExporter
 
-Prometheus exporter exposing **sun and moon position** metrics (azimuth, altitude, sunrise/sunset, civil/nautical/astronomical dawn/dusk, moonrise/moonset, lunar illumination) for named geographic locations.
+Prometheus exporter exposing **sun and moon position** metrics (azimuth, altitude, sunrise/sunset,
+civil/nautical/astronomical, dawn/dusk, moonrise/moonset, lunar illumination) for named geographic locations.
 
-Built in C# .NET 10 with NativeAOT — ~16 MB native binary, ~32 MB RAM. The astronomical math is delegated to [AASharp](https://github.com/jsauve/AASharp), a C# port of Naughter's [AA+](http://www.naughter.com/aa.html) (Meeus's *Astronomical Algorithms*).
+Built in C# .NET 10 with NativeAOT — ~16 MB native binary, ~32 MB RAM. The astronomical math is delegated to
+[AASharp](https://github.com/jsauve/AASharp), a C# port of Naughter's [AA+](http://www.naughter.com/aa.html)
+(Meeus's *Astronomical Algorithms*).
 
 ## Usage
 
@@ -22,7 +25,9 @@ Then scrape with the location name as a query param:
 GET /metrics?location=warsaw
 ```
 
-Location names are matched case-insensitively, so `warsaw`, `Warsaw`, and `WARSAW` all resolve to the same entry. The match uses ordinal case folding, which covers ASCII A–Z only — non-ASCII letters (e.g. `Łódź` vs `łódź`) are **not** folded and must match exactly.
+Location names are matched case-insensitively, so `warsaw`, `Warsaw`, and `WARSAW` all resolve to the same entry.
+The match uses ordinal case folding, which covers ASCII A–Z only — non-ASCII letters (e.g. `Łódź` vs `łódź`) are
+**not** folded and must match exactly.
 
 ## Endpoints
 
@@ -34,7 +39,9 @@ Location names are matched case-insensitively, so `warsaw`, `Warsaw`, and `WARSA
 
 ## Metrics
 
-All event timestamps are the **next** occurrence within 24h of the scrape, expressed in Unix seconds (UTC). `NaN` if the event does not occur in that window (e.g. polar day/night, latitudes too high for astronomical darkness in midsummer).
+All event timestamps are the **next** occurrence within 24h of the scrape, expressed in Unix seconds (UTC).
+`NaN` if the event does not occur in that window (e.g. polar day/night, latitudes too high for astronomical
+darkness in midsummer).
 
 | Metric | Type | Description |
 |--------|------|-------------|
@@ -48,6 +55,20 @@ All event timestamps are the **next** occurrence within 24h of the scrape, expre
 | `astro_sun_event_time_seconds{event="sunrise\|sunset\|solar_noon\|civil_dawn\|civil_dusk\|nautical_dawn\|nautical_dusk\|astronomical_dawn\|astronomical_dusk"}` | gauge | Next sun event time (Unix seconds, UTC) |
 | `astro_moon_event_time_seconds{event="moonrise\|moonset\|moon_transit"}` | gauge | Next moon event time (Unix seconds, UTC) |
 | `astro_calculation_seconds` | gauge | Wall-clock time spent computing the scrape |
+
+## Precision
+
+Output values are rounded to reflect the actual accuracy of the underlying Meeus algorithms:
+
+| Value type | Output precision | Algorithm accuracy |
+|---|---|---|
+| Angles (altitude, azimuth, phase angle) | 2 decimal places (0.01°) | Truncated VSOP87: ~36 arcseconds ≈ 0.01° |
+| Illumination fraction | 4 decimal places (0.0001) | Propagated from position error (~0.00009 max) |
+| Moon distance | Integer kilometres | 60-term series: ±10 km |
+| Event timestamps | Integer Unix seconds | Rise/set step resolution ~10 minutes |
+| `astro_calculation_seconds` | 4 decimal places | Real wall-clock measurement |
+
+Digits beyond these bounds would reflect floating-point rounding noise, not physical accuracy.
 
 ## Build & run
 
@@ -65,7 +86,8 @@ docker compose up --build
 
 ## Prometheus scrape config
 
-Because `location` is a query parameter, each location is a separate scrape target. List the locations as targets and use `relabel_configs` to rewrite each into the `location` query param:
+Because `location` is a query parameter, each location is a separate scrape target. List the locations as targets
+and use `relabel_configs` to rewrite each into the `location` query param:
 
 ```yaml
 scrape_configs:

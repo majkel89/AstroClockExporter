@@ -18,7 +18,7 @@ astro_moon_illumination_fraction 0.625
 astro_moon_phase_angle_degrees 78.5
 # HELP astro_moon_distance_km Earth-Moon centre-to-centre distance (kilometres)
 # TYPE astro_moon_distance_km gauge
-astro_moon_distance_km -Inf
+astro_moon_distance_km NaN
 # HELP astro_sun_event_time_seconds Sun event time today (Unix seconds, UTC). NaN if event does not occur.
 # TYPE astro_sun_event_time_seconds gauge
 astro_sun_event_time_seconds{event="sunrise"} NaN
@@ -37,4 +37,4 @@ astro_moon_event_time_seconds{event="moonset"} NaN
 astro_moon_event_time_seconds{event="moon_transit"} NaN
 # HELP astro_calculation_seconds Wall-clock time spent computing this scrape (seconds)
 # TYPE astro_calculation_seconds gauge
-astro_calculation_seconds 0.012345
+astro_calculation_seconds 0.0123

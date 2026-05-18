@@ -11,23 +11,23 @@ public sealed record AstroReading
     // Moon metadata
     public double MoonIlluminationFraction { get; init; }
     public double MoonPhaseAngleDegrees { get; init; }
-    public double MoonDistanceKilometres { get; init; }
+    public long MoonDistanceKilometres { get; init; }
 
-    // Sun events for today (Unix seconds, NaN if event doesn't occur)
-    public double SunriseUnix { get; init; }
-    public double SunsetUnix { get; init; }
-    public double SolarNoonUnix { get; init; }
-    public double CivilDawnUnix { get; init; }
-    public double CivilDuskUnix { get; init; }
-    public double NauticalDawnUnix { get; init; }
-    public double NauticalDuskUnix { get; init; }
-    public double AstronomicalDawnUnix { get; init; }
-    public double AstronomicalDuskUnix { get; init; }
+    // Sun events for today (Unix seconds, long.MinValue if event doesn't occur)
+    public long SunriseUnix { get; init; }
+    public long SunsetUnix { get; init; }
+    public long SolarNoonUnix { get; init; }
+    public long CivilDawnUnix { get; init; }
+    public long CivilDuskUnix { get; init; }
+    public long NauticalDawnUnix { get; init; }
+    public long NauticalDuskUnix { get; init; }
+    public long AstronomicalDawnUnix { get; init; }
+    public long AstronomicalDuskUnix { get; init; }
 
-    // Moon events for today (Unix seconds, NaN if event doesn't occur)
-    public double MoonriseUnix { get; init; }
-    public double MoonsetUnix { get; init; }
-    public double MoonTransitUnix { get; init; }
+    // Moon events for today (Unix seconds, long.MinValue if event doesn't occur)
+    public long MoonriseUnix { get; init; }
+    public long MoonsetUnix { get; init; }
+    public long MoonTransitUnix { get; init; }
 
     // Self-monitoring
     public double CalculationSeconds { get; init; }

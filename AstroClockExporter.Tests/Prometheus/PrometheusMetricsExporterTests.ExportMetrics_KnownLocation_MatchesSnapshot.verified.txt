@@ -1,6 +1,6 @@
 ﻿# HELP astro_sun_altitude_degrees Current sun altitude above the horizon (degrees)
 # TYPE astro_sun_altitude_degrees gauge
-astro_sun_altitude_degrees 42.125
+astro_sun_altitude_degrees 42.13
 # HELP astro_sun_azimuth_degrees Current sun azimuth (degrees, measured clockwise from north)
 # TYPE astro_sun_azimuth_degrees gauge
 astro_sun_azimuth_degrees 180.5
@@ -37,4 +37,4 @@ astro_moon_event_time_seconds{event="moonset"} 1750060000
 astro_moon_event_time_seconds{event="moon_transit"} 1750035000
 # HELP astro_calculation_seconds Wall-clock time spent computing this scrape (seconds)
 # TYPE astro_calculation_seconds gauge
-astro_calculation_seconds 0.012345
+astro_calculation_seconds 0.0123

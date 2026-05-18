@@ -55,38 +55,38 @@ public class AstroCalculatorTests
     {
         var reading = _calculator.Calculate(Tromso, new DateTime(2025, 12, 21, 12, 0, 0, DateTimeKind.Utc));
 
-        Assert.True(double.IsNaN(reading.SunriseUnix));
-        Assert.True(double.IsNaN(reading.SunsetUnix));
+        Assert.Equal(long.MinValue, reading.SunriseUnix);
+        Assert.Equal(long.MinValue, reading.SunsetUnix);
     }
 
-    // Strips CalculationSeconds (wall-clock, non-deterministic) and rounds doubles for
-    // cross-CPU snapshot stability. AASharp itself is deterministic for fixed UT input.
+    // Strips CalculationSeconds (wall-clock, non-deterministic) and rounds doubles to match
+    // the precision of the Prometheus formatter for cross-CPU snapshot stability.
     private static object Project(AstroReading r) => new
     {
-        SunAltitudeDegrees = Round(r.SunAltitudeDegrees),
-        SunAzimuthDegrees = Round(r.SunAzimuthDegrees),
-        MoonAltitudeDegrees = Round(r.MoonAltitudeDegrees),
-        MoonAzimuthDegrees = Round(r.MoonAzimuthDegrees),
-        MoonIlluminationFraction = Round(r.MoonIlluminationFraction),
-        MoonPhaseAngleDegrees = Round(r.MoonPhaseAngleDegrees),
-        MoonDistanceKilometres = Round(r.MoonDistanceKilometres, 3),
-        SunriseUnix = RoundEvent(r.SunriseUnix),
-        SunsetUnix = RoundEvent(r.SunsetUnix),
-        SolarNoonUnix = RoundEvent(r.SolarNoonUnix),
-        CivilDawnUnix = RoundEvent(r.CivilDawnUnix),
-        CivilDuskUnix = RoundEvent(r.CivilDuskUnix),
-        NauticalDawnUnix = RoundEvent(r.NauticalDawnUnix),
-        NauticalDuskUnix = RoundEvent(r.NauticalDuskUnix),
-        AstronomicalDawnUnix = RoundEvent(r.AstronomicalDawnUnix),
-        AstronomicalDuskUnix = RoundEvent(r.AstronomicalDuskUnix),
-        MoonriseUnix = RoundEvent(r.MoonriseUnix),
-        MoonsetUnix = RoundEvent(r.MoonsetUnix),
-        MoonTransitUnix = RoundEvent(r.MoonTransitUnix),
+        SunAltitudeDegrees = Round(r.SunAltitudeDegrees, 2),
+        SunAzimuthDegrees = Round(r.SunAzimuthDegrees, 2),
+        MoonAltitudeDegrees = Round(r.MoonAltitudeDegrees, 2),
+        MoonAzimuthDegrees = Round(r.MoonAzimuthDegrees, 2),
+        MoonIlluminationFraction = Round(r.MoonIlluminationFraction, 4),
+        MoonPhaseAngleDegrees = Round(r.MoonPhaseAngleDegrees, 2),
+        MoonDistanceKilometres = Event(r.MoonDistanceKilometres),
+        SunriseUnix = Event(r.SunriseUnix),
+        SunsetUnix = Event(r.SunsetUnix),
+        SolarNoonUnix = Event(r.SolarNoonUnix),
+        CivilDawnUnix = Event(r.CivilDawnUnix),
+        CivilDuskUnix = Event(r.CivilDuskUnix),
+        NauticalDawnUnix = Event(r.NauticalDawnUnix),
+        NauticalDuskUnix = Event(r.NauticalDuskUnix),
+        AstronomicalDawnUnix = Event(r.AstronomicalDawnUnix),
+        AstronomicalDuskUnix = Event(r.AstronomicalDuskUnix),
+        MoonriseUnix = Event(r.MoonriseUnix),
+        MoonsetUnix = Event(r.MoonsetUnix),
+        MoonTransitUnix = Event(r.MoonTransitUnix),
     };
 
-    private static double Round(double value, int decimals = 6) =>
+    private static double Round(double value, int decimals) =>
         double.IsFinite(value) ? Math.Round(value, decimals) : value;
 
-    private static double RoundEvent(double value) =>
-        double.IsFinite(value) ? Math.Round(value, 0) : value;
+    private static object Event(long value) =>
+        value == long.MinValue ? (object)"NaN" : value;
 }
