@@ -72,10 +72,24 @@ Digits beyond these bounds would reflect floating-point rounding noise, not phys
 
 ## Build & run
 
+Pull the published image from Docker Hub:
+
+```sh
+docker pull majkel89/astro-clock-exporter:latest
+docker run --rm -p 8080:8080 -v $PWD/AstroClockExporter.Api/config.yml:/app/config.yml:ro \
+  majkel89/astro-clock-exporter:latest
+curl 'http://localhost:8080/metrics?location=warsaw'
+```
+
+For reproducible deployments, pin to a specific version (e.g. `:v0.1.1`) or to an immutable digest — see the
+[tags on Docker Hub](https://hub.docker.com/r/majkel89/astro-clock-exporter/tags) and each GitHub Release's notes
+for the published `sha256:...` digest.
+
+Or build locally:
+
 ```sh
 docker build -t astro-clock-exporter -f AstroClockExporter.Api/Dockerfile .
 docker run --rm -p 8080:8080 -v $PWD/AstroClockExporter.Api/config.yml:/app/config.yml:ro astro-clock-exporter
-curl 'http://localhost:8080/metrics?location=warsaw'
 ```
 
 Or via compose:
