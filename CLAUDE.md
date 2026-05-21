@@ -105,3 +105,31 @@ literals (`0`, `1`, `2`) used as indices or loop bounds are exempt.
 
 User-facing docs (metrics catalogue, Prometheus scrape config, Docker run, env vars) live in `README.md`.
 Update it when adding metrics, endpoints, or env vars.
+
+## Releasing
+
+Releases are gated on creating a GitHub Release. The `.github/workflows/docker-publish.yml` workflow listens for
+`release: published` and builds + pushes a Docker image to `docker.io/majkel89/astro-clock-exporter`.
+
+To cut a new version `vX.Y.Z`:
+
+1. Ensure everything to ship is merged to `main`.
+2. Create the release (this creates the tag and fires the workflow):
+
+   ```sh
+   gh release create vX.Y.Z --target main --title "vX.Y.Z" --generate-notes
+   ```
+
+   Mark it as pre-release if it should not move the `latest` tag.
+
+3. The workflow pushes these tags to Docker Hub: `vX.Y.Z`, `X.Y.Z`, `X.Y`, `latest` (stable releases only),
+   `sha-<short>`. The README references `:latest` so docs stay current automatically — no commit-back from CI.
+4. The workflow appends a "Docker image" section to the GitHub Release notes containing the immutable
+   `sha256:...` digest and a copy-pasteable pinned-pull command.
+5. Verify with `gh run watch` and a clean `docker pull majkel89/astro-clock-exporter:vX.Y.Z`.
+
+If the publish fails after the release was created, fix the cause then re-run via the Actions tab using the
+workflow's `workflow_dispatch` input (the existing release tag) — no need to delete and re-cut the release.
+
+Required repo secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` (token scoped Read/Write/Delete on
+`majkel89/astro-clock-exporter`).
