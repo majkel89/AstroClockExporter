@@ -15,7 +15,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false && \
     rm -rf /app/publish/appsettings.Development.json /app/publish/config.yml
 
-FROM alpine:3.22 AS runtime
+FROM alpine:3 AS runtime
 ARG APP_UID=nobody
 ARG PORT=8080
 ENV ASPNETCORE_URLS="http://0.0.0.0:${PORT}/"

@@ -144,3 +144,24 @@ scrape_configs:
 | `Logging__LogLevel__AstroClockExporter.Core.Prometheus.PrometheusMetricsExporter` | `Information` | Per-scrape log verbosity |
 
 Environment variables of the form `${VAR}` or `${VAR:-default}` inside `config.yml` are substituted at startup.
+
+
+## Build docker image
+
+```shell
+docker image build \
+  --pull \
+  --file AstroClockExporter.Api/Dockerfile \
+  --target runtime \
+  --platform linux/amd64 \
+  --tag majkel89/astro-clock-exporter:latest \
+  .
+```
+
+## Publish docker image
+
+```shell
+docker tag majkel89/astro-clock-exporter:latest majkel89/astro-clock-exporter:0.1.2
+docker push majkel89/astro-clock-exporter:latest
+docker push majkel89/astro-clock-exporter:0.1.2
+```
