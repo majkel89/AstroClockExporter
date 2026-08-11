@@ -161,7 +161,7 @@ docker image build \
 ## Publish docker image
 
 ```shell
-docker tag majkel89/astro-clock-exporter:latest majkel89/astro-clock-exporter:0.1.2
+docker tag majkel89/astro-clock-exporter:latest majkel89/astro-clock-exporter:0.1.3
 docker push majkel89/astro-clock-exporter:latest
-docker push majkel89/astro-clock-exporter:0.1.2
+docker push majkel89/astro-clock-exporter:0.1.3
 ```
